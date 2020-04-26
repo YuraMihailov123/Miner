@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Miner.Controllers;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -15,6 +16,8 @@ namespace Miner
         public Form1()
         {
             InitializeComponent();
+
+            MapController.Init(this);
         }
     }
 }
