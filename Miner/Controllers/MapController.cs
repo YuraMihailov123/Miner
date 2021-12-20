@@ -26,6 +26,8 @@ namespace Miner.Controllers
 
         private static Point firstCoord;
 
+        private static Point prevCoord;
+
         public static Form form;
 
         private static void ConfigureMapSize(Form current)
@@ -76,6 +78,9 @@ namespace Miner.Controllers
         private static void OnButtonPressedMouse(object sender, MouseEventArgs e)
         {
             Button pressedButton = sender as Button;
+            int iButton = pressedButton.Location.Y / cellSize;
+            int jButton = pressedButton.Location.X / cellSize;
+            firstCoord = new Point(jButton, iButton);
             switch (e.Button.ToString())
             {
                 case "Right":
@@ -85,11 +90,15 @@ namespace Miner.Controllers
                     OnLeftButtonPressed(pressedButton);
                     break;
             }
+            prevCoord = firstCoord;
         }
 
         private static void OnRightButtonPressed(Button pressedButton)
         {
-            currentPictureToSet++;
+            if (firstCoord == prevCoord)
+                currentPictureToSet++;
+            else
+                currentPictureToSet = 1;
             currentPictureToSet %= 3;
             int posX = 0;
             int posY = 0;
