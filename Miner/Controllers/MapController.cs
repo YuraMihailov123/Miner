@@ -26,7 +26,15 @@ namespace Miner.Controllers
 
         private static Point firstCoord;
 
+        private static Point prevCoord;
+
         public static Form form;
+
+        private static int numberOfBombs;
+
+        private static int numberOfAllocatedBombs;
+
+        private static int numberOfCells;
 
         private static void ConfigureMapSize(Form current)
         {
@@ -47,6 +55,8 @@ namespace Miner.Controllers
 
         public static void Init(Form current)
         {
+            numberOfAllocatedBombs = 0;
+            numberOfCells = mapSize * mapSize;
             form = current;
             currentPictureToSet = 0;
             isFirstStep = true;
@@ -76,6 +86,9 @@ namespace Miner.Controllers
         private static void OnButtonPressedMouse(object sender, MouseEventArgs e)
         {
             Button pressedButton = sender as Button;
+            int iButton = pressedButton.Location.Y / cellSize;
+            int jButton = pressedButton.Location.X / cellSize;
+            firstCoord = new Point(jButton, iButton);
             switch (e.Button.ToString())
             {
                 case "Right":
@@ -85,11 +98,21 @@ namespace Miner.Controllers
                     OnLeftButtonPressed(pressedButton);
                     break;
             }
+            if (numberOfCells == numberOfBombs && numberOfAllocatedBombs == numberOfBombs)
+            {
+                MessageBox.Show("Победа!");
+                form.Controls.Clear();
+                Init(form);
+            }
+            prevCoord = firstCoord;
         }
 
         private static void OnRightButtonPressed(Button pressedButton)
         {
-            currentPictureToSet++;
+            if (firstCoord == prevCoord)
+                currentPictureToSet++;
+            else
+                currentPictureToSet = 1;
             currentPictureToSet %= 3;
             int posX = 0;
             int posY = 0;
@@ -98,14 +121,17 @@ namespace Miner.Controllers
                 case 0:
                     posX = 0;
                     posY = 0;
+                    numberOfAllocatedBombs--;
                     break;
                 case 1:
                     posX = 0;
                     posY = 2;
+                    numberOfAllocatedBombs++;
                     break;
                 case 2:
                     posX = 2;
                     posY = 2;
+                    numberOfAllocatedBombs--;
                     break;
             }
             pressedButton.Image = FindNeededImage(posX, posY);
@@ -163,9 +189,9 @@ namespace Miner.Controllers
         private static void SeedMap()
         {
             Random r = new Random();
-            int number = r.Next(7, 15);
+            numberOfBombs = r.Next(7, 15);
 
-            for(int i = 0; i < number; i++)
+            for(int i = 0; i < numberOfBombs; i++)
             {
                 int posI = r.Next(0, mapSize - 1);
                 int posJ = r.Next(0, mapSize - 1);
@@ -238,6 +264,7 @@ namespace Miner.Controllers
                     buttons[i, j].Image = FindNeededImage(0, 0);
                     break;
             }
+            numberOfCells--;
         }
 
         private static void OpenCells(int i,int j)
@@ -255,10 +282,10 @@ namespace Miner.Controllers
                         continue;
                     if (!buttons[k, l].Enabled)
                         continue;
-                    if (map[k, l] == 0)
+                    if (map[k, l] >= 0)
                         OpenCells(k, l);
-                    else if (map[k, l] > 0)
-                        OpenCell(k, l);
+                    //else if (map[k, l] > 0)
+                    //    OpenCell(k, l);
                 }
             }
         }
